@@ -33,10 +33,22 @@ yjsWss.on("connection", (ws, req) => {
   setupWSConnection(ws, req);
 });
 const io = new Server(server, {
-  cors: { origin: ["http://localhost:5173"], credentials: true }
+  cors: { 
+    origin: [
+      "http://localhost:5173",
+      "https://collaborative-codesync-frontend.onrender.com"
+    ], 
+    credentials: true 
+  }
 });
 app.use(express.json());
-app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+app.use(cors({ 
+  origin: [
+    "http://localhost:5173",
+    "https://collaborative-codesync-frontend.onrender.com"
+  ], 
+  credentials: true 
+}));
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
