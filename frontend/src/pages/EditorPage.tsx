@@ -48,10 +48,13 @@ const EditorPage = () => {
   const [language,    setLanguage]    = useState("javascript");
   const [output,      setOutput]      = useState("");
   const [userInput,   setUserInput]   = useState("");
+  
+  // Mobile menu states
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showConsole, setShowConsole] = useState(true);
   const [aiResponse,  setAiResponse]  = useState("");
   const [aiQuestion,  setAiQuestion]  = useState("");
   const [aiLoading,   setAiLoading]   = useState(false);
-  const [showConsole, setShowConsole] = useState(true);
 
   // FIX: typing stored as Map<name, timer> — prevents self-display, auto-clears per user
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
@@ -435,18 +438,32 @@ const EditorPage = () => {
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
 
-      {/* ── Top Bar ─────────────────────────────────────────────────────── */}
-      <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-card/50 backdrop-blur-sm shrink-0">
-        <div className="flex items-center gap-4">
+      {/* ── Top Bar (Responsive) ────────────────────────────────────────── */}
+      <header className="h-14 border-b border-border flex items-center justify-between px-4 md:px-6 bg-card/50 backdrop-blur-sm shrink-0">
+        {/* Left side */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Mobile sidebar toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="md:hidden h-8 w-8 p-0"
+            title="Toggle Sidebar"
+          >
+            <Users className="w-4 h-4" />
+          </Button>
+          
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
               <Code2 className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-semibold text-foreground">CodeSync</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">v2.0</span>
+            <span className="font-semibold text-foreground hidden sm:inline">CodeSync</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 hidden md:inline">v2.0</span>
           </div>
-          <div className="h-6 w-px bg-border" />
-          <div className="flex items-center gap-2">
+          
+          {/* Room info - hidden on small screens */}
+          <div className="hidden md:flex items-center gap-2">
+            <div className="h-6 w-px bg-border" />
             <span className="text-sm text-muted-foreground">Room:</span>
             <span className="text-sm font-mono text-foreground">{roomId.slice(0,8)}...</span>
             <span className="text-xs px-2 py-1 rounded-full bg-success/10 text-success border border-success/20 flex items-center gap-1">
@@ -455,24 +472,62 @@ const EditorPage = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-secondary/50 text-xs text-muted-foreground">
-            <Users className="w-4 h-4" /><span>{users.length} online</span>
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+          {/* User count - always visible */}
+          <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-secondary/50 text-xs text-muted-foreground">
+            <Users className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="hidden sm:inline">{users.length}</span>
           </div>
-          <Button variant="outline" size="sm" onClick={copyRoomId} className="h-9">
+          
+          {/* Desktop buttons */}
+          <Button variant="outline" size="sm" onClick={copyRoomId} className="hidden md:flex h-9">
             <Copy className="w-4 h-4 mr-2" />Copy ID
           </Button>
-          <Button variant="outline" size="sm" onClick={leaveRoom} className="h-9">Leave Room</Button>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="h-9">
-            <LogOut className="w-4 h-4 mr-2" />Logout
+          <Button variant="outline" size="sm" onClick={leaveRoom} className="hidden sm:flex h-9">
+            Leave
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 md:h-9">
+            <LogOut className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Logout</span>
           </Button>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
 
-        {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-        <aside className="w-64 bg-card border-r border-border flex flex-col shrink-0">
+        {/* ── Sidebar (Responsive with overlay) ──────────────────────────── */}
+        {/* Mobile overlay */}
+        {showSidebar && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setShowSidebar(false)}
+          />
+        )}
+        
+        {/* Sidebar */}
+        <aside className={`
+          fixed md:relative
+          inset-y-0 left-0
+          w-64 bg-card border-r border-border 
+          flex flex-col shrink-0
+          z-50
+          transform transition-transform duration-300 ease-in-out
+          ${showSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
+          {/* Mobile close button */}
+          <div className="md:hidden flex items-center justify-between p-4 border-b border-border">
+            <span className="font-semibold">Menu</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSidebar(false)}
+              className="h-8 w-8 p-0"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+          
           <div className="p-4 border-b border-border">
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Language</h3>
             {/* FIX: controlled by `language` state — updates when server broadcasts languageUpdate */}
@@ -582,13 +637,27 @@ const EditorPage = () => {
             />
           </div>
 
-          {/* ── Right panel (Console + AI) ─────────────────────────────── */}
-          {/* FIX: use CSS display:none instead of conditional render —
-              prevents destroying state (output, aiResponse) when toggling */}
-          <div
-            style={{ display: showConsole ? "flex" : "none" }}
-            className="w-[30rem] flex-col bg-gradient-to-b from-card to-card/95 border-l-2 border-primary/20 shadow-2xl"
-          >
+          {/* ── Right panel (Console + AI) - Responsive ────────────────────── */}
+          {/* Mobile: Full screen overlay, Desktop: Side panel */}
+          {showConsole && (
+            <>
+              {/* Mobile overlay backdrop */}
+              <div 
+                className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                onClick={() => setShowConsole(false)}
+              />
+              
+              {/* Console panel */}
+              <div className={`
+                fixed md:relative
+                inset-0 md:inset-auto
+                w-full md:w-[30rem]
+                flex flex-col
+                bg-gradient-to-b from-card to-card/95 
+                border-l-2 border-primary/20 shadow-2xl
+                z-50 md:z-auto
+                overflow-hidden
+              `}>
             {/* Console section */}
             <div className="h-[22rem] shrink-0 flex flex-col border-b-2 border-primary/10">
               <div className="h-12 flex items-center justify-between px-5 border-b border-border/50 bg-gradient-to-r from-secondary/40 to-secondary/20 shrink-0">
