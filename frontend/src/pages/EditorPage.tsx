@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Code2, Play, Users, Copy, LogOut, Terminal, X } from "lucide-react";
 
-const SOCKET_URL = "http://localhost:1600";
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:1600";
 
 // ── Socket created ONCE outside component — never re-instantiated on re-render ──
 const socket = io(SOCKET_URL, { autoConnect: true });

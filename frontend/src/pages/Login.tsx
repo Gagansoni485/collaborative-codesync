@@ -6,7 +6,7 @@ import { Code2, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 
-const SOCKET_URL = "http://localhost:1600";
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:1600";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
