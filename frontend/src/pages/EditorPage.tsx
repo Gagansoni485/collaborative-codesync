@@ -774,7 +774,9 @@ const EditorPage = () => {
                 </div>
               </div>
             </div>
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
